@@ -10,7 +10,7 @@ Claude Code forgets everything between conversations. This plugin fixes that wit
 |---|---|
 | `vault-setup` | One-time setup. Asks five questions, one at a time, then creates `CLAUDE.md`, `MEMORY.md`, `01 Daily Logs/`, `02 Projects/`, and — if you want them — `03 Life/` and `raw/`. |
 | `good-morning` | Start-of-day orientation. Leads with what's still open, then what got finished, then one recommendation for what to work on. |
-| `end-of-day` | Writes a short handoff log for the current session, and reconciles each project's Key Files table so nothing goes unlinked. |
+| `end-of-day` | Writes a short handoff log for the current session, updates `MEMORY.md` with what is still true, and reconciles each project's Key Files table so nothing goes unlinked. |
 | `new-project` | Interviews you one question at a time, then creates the project folder, its hub file, and an entry in `CLAUDE.md`. |
 | `vault-import` | Optional, run once. Reads your Gmail, Drive and Calendar history and builds a profile of you — interests, working style, the people around you. Proposes every finding for approval and writes only what you accept. |
 
@@ -268,7 +268,7 @@ To write one explicitly, say **"end of day"** ("wrap up", "we're done", "done fo
 
 Logs land in `01 Daily Logs/YYYY-MM-DD.md`, one `## [Project Name]` section per project you touched that day, each with what was worked on, what changed, what's still open, and where to pick up next time. Work past midnight and it still writes to the day the session started — anything before 06:00 goes to the previous day's file.
 
-It also does one bit of housekeeping: for every file it just listed as built or changed, it makes sure that file points at its project hub and appears in the hub's `## Key Files` table. Files created outside a session get picked up here.
+It also does two bits of housekeeping. For every file it just listed as built or changed, it makes sure that file points at its project hub and appears in the hub's `## Key Files` table — files created outside a session get picked up here. And it rewrites each touched project's block in `MEMORY.md` so that file says what is true *now*, not what happened: open questions, decisions later work depends on, what's blocking and on whom. Five lines per project, and a line is deleted the moment it stops being true.
 
 ### A typical week
 
@@ -315,7 +315,7 @@ Every wikilink is written as a **filename only** — `[[PROJ Client Onboarding O
 | File | What it's for | Edit it yourself? |
 |---|---|---|
 | `CLAUDE.md` | Who you are, your language, the active-projects table, skills available. Read first in every session. | Yes — keep it short. It's read every time. |
-| `MEMORY.md` | Current state only, not a history — open questions, pending decisions. Delete blocks when they stop being true. | Yes. |
+| `MEMORY.md` | Current state only, not a history — open questions, pending decisions. Maintained by `end-of-day`, one block per project, five lines each. | Yes — and it gets rewritten per project as work moves. |
 | `01 Daily Logs/*.md` | Session handoff notes, written by `end-of-day`. | Rarely — let the skill own these. |
 | `02 Projects/*/PROJ * Overview.md` | The project hub: goal, why, tangible outcomes, open problems, `## Key Files`, `## Links Out`, and an optional `## Tasks` section. | Yes — this is the file to keep current. |
 | `03 Life/` | Same shape as `02 Projects/`, for things that aren't work. Optional. | Yes. |
@@ -346,6 +346,14 @@ To remove it:
 ```
 
 Your `CLAUDE.md`, logs, and projects stay exactly where they are.
+
+---
+
+## Upgrading to v1.3
+
+Nothing to do. `end-of-day` now maintains `MEMORY.md` — before v1.3 the file was created at setup and then never written to again, so it sat at "Nothing here yet." while `good-morning` dutifully read it every morning. Update the plugin, restart, and the next `end-of-day` starts filling it.
+
+If your `MEMORY.md` has been collecting hand-written notes, leave them — the skill replaces a project's block only when that project's state changes, and anything under a heading it doesn't recognise is left alone.
 
 ---
 

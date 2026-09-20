@@ -1,7 +1,7 @@
 {
   "name": "second-brain-kit",
   "description": "Set up a personal Obsidian-friendly vault workspace with morning orientation, end-of-day logging, linked project files, and Arabic or English support.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": {
     "name": "Jassim Almulla",
     "url": "https://github.com/jalmulla2"

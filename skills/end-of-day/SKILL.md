@@ -1,6 +1,6 @@
 ---
 name: end-of-day
-description: Writes the daily log entry for a work session so the next Claude session can pick up where things left off. Trigger whenever the user says "end of day", "wrap up", "we're done", "that's it for today", "log today", "done for the day", "goodnight", "shutdown", or anything that signals they're finishing a work session. Also triggers automatically at the end of any session that changed something in the vault, and when a conversation is closing — silently write or update the daily log without asking the user. Sessions run past midnight, so the log date is not always today's date.
+description: Writes the daily log entry for a work session, and updates MEMORY.md with what is still true, so the next Claude session can pick up where things left off. Trigger whenever the user says "end of day", "wrap up", "we're done", "that's it for today", "log today", "done for the day", "goodnight", "shutdown", or anything that signals they're finishing a work session. Also triggers automatically at the end of any session that changed something in the vault, and when a conversation is closing — silently write or update the daily log without asking the user. Sessions run past midnight, so the log date is not always today's date.
 ---
 
 # End of Day
@@ -29,7 +29,7 @@ When this skill is triggered by a conversation closing (not an explicit user req
 2. Work out which day's log to write to (see "Which day" below), and check whether it exists.
 3. If it **does not exist** — create it (full format in Step 3).
 4. If it **does exist** — read the existing content first. If this conversation's project/topic is already covered, check whether there is new content to add (new tasks done, new files built, new open items). If so, append to the existing section or add a new section. If nothing new, skip.
-5. Reconcile the project hubs (Step 2) either way — that runs whether the log was created, appended to, or skipped for having nothing new.
+5. Reconcile the project hubs (Step 2) and update `MEMORY.md` (Step 4) either way — both run whether the log was created, appended to, or skipped for having nothing new.
 6. Do NOT ask the user questions. Do NOT confirm with the user. Just write and close.
 
 ## Which day — the after-midnight rule
@@ -151,7 +151,31 @@ Add only the project section — no new frontmatter or top-level heading:
 
 Only include "Still Open" if there's actually something unresolved. Don't invent open items.
 
-## Step 4 — Confirm (explicit user request only)
+## Step 4 — Update MEMORY.md
+
+The log records what happened. `MEMORY.md` records what is **true now**. They are different files because they answer different questions, and the log alone can't answer the second one — reconstructing current state means reading every log backwards and working out what a later one cancelled.
+
+Open `MEMORY.md` at the workspace root. For each project this session touched, write or replace its block:
+
+```markdown
+## [Project Name]
+- [something still true and still undecided]
+- [a decision taken that later work depends on]
+- [what is blocking, and on whom]
+```
+
+Rules that keep it from turning into a second log:
+
+- **Replace the block, don't append to it.** A project has one block, and it says what is true now. If nothing about the project's state changed this session, leave its block alone.
+- **Five lines at most per project.** If a sixth line is worth having, one of the five has stopped being worth having — delete that one.
+- **State, never events.** "Scope settled: autogenous and bacterial only, 2010+" is state. "Wrote the scope note" is an event and belongs in the log. If a line would read naturally under a `### What We Worked On` heading, it's in the wrong file.
+- **Delete a line the moment it stops being true.** A stale line is worse than a missing one — `good-morning` reads this file and will act on it.
+- **Delete the whole block when the project closes.**
+- Remove the `Nothing here yet.` placeholder when the first block lands.
+
+Do not add frontmatter, wikilinks or a `project` key. `MEMORY.md` is read at the start of every session, so its length is a recurring cost — the five-line cap is the whole point of the file.
+
+## Step 5 — Confirm (explicit user request only)
 
 If triggered by the user explicitly, tell them where the file was saved and give them the "Start Here Next Time" line so they know the handoff is solid. Keep it to one or two lines — they're done for the day.
 
