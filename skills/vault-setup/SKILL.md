@@ -69,6 +69,7 @@ Daily logs are the exception to both. A log carries no `project` key and no wiki
 - **good-morning** — start-of-day orientation: open items first, then what got finished, then one recommendation
 - **end-of-day** — writes the session handoff log and reconciles the project hubs
 - **new-project** — interviews you and creates a project folder, its hub file, and a row above
+- **vault-import** — reads your mail, calendar and drive and builds a profile of you from what's already there, one approved finding at a time
 ````
 
 Write the prose in the user's chosen language; keep every heading, key and path above in English.
@@ -128,5 +129,6 @@ Tell the user, briefly:
 - `CLAUDE.md` and `MEMORY.md` are set up, and which folders were created
 - Their language default is recorded in the `## Language` block of `CLAUDE.md` — editing that block changes it later
 - The next step is to say **"good morning"** to start their first session, or **"new project"** to create their first project right away
+- If they'd rather not start from an empty page, **"learn about me"** reads their mail, calendar and drive and builds a profile from what's already there — nothing gets written without their approval
 
-Keep it to four lines — they're ready to go.
+Keep it to five lines — they're ready to go.

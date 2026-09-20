@@ -12,6 +12,7 @@ Claude Code forgets everything between conversations. This plugin fixes that wit
 | `good-morning` | Start-of-day orientation. Leads with what's still open, then what got finished, then one recommendation for what to work on. |
 | `end-of-day` | Writes a short handoff log for the current session, and reconciles each project's Key Files table so nothing goes unlinked. |
 | `new-project` | Interviews you one question at a time, then creates the project folder, its hub file, and an entry in `CLAUDE.md`. |
+| `vault-import` | Optional, run once. Reads your Gmail, Drive and Calendar history and builds a profile of you — interests, working style, the people around you. Proposes every finding for approval and writes only what you accept. |
 
 You can work in **Arabic or English** — pick during `vault-setup`. That choice is the default for everything Claude says and everything it writes into your logs and project files. If you write to Claude in the other language it follows you for the rest of that conversation; the next session starts from your default again.
 
@@ -190,6 +191,47 @@ Then say **"good morning"** to start your first real session, or **"new project"
 
 ---
 
+## Starting from your history
+
+A vault set up on Monday knows nothing about you until Friday. If you'd rather not begin from a blank page, say:
+
+```
+learn about me
+```
+
+That runs `vault-import`. It reads accounts you already have — Gmail, Google Drive, Calendar — and works out the things a vault would otherwise take months to learn: what you keep returning to, who you actually work with, when you work, what you say yes and no to.
+
+It asks four questions first, one per message:
+
+1. **Which accounts** should it read? Only the ones you name, only the ones actually connected.
+2. **How far back?** A date, or "the last two years".
+3. **What should stay out of it?** It names the categories — money, health, legal, family, friction, anything told to you in confidence — and you strike out what you don't want. Whatever you exclude is skipped *while reading*, so it never reaches the conversation at all.
+4. **How deep?** Facts only — people, projects, organisations — or facts plus inference about preferences, working style and personality.
+
+Then it scans one source at a time and shows you what it found after each, as a numbered list with the evidence attached to every line:
+
+```
+Working style
+1. Prefers async over meetings — declined 61 of 94 ad-hoc invites, replied on the thread instead
+2. Writes early — 70% of your sent mail goes out before 08:00
+```
+
+**Nothing is written until you approve it, line by line.** Accept, reject, or reword each finding — rewording is the usual outcome, and your wording is what gets saved. What you approve lands in:
+
+```
+04 Profile/
+├── PROFILE Overview.md   ← identity, interests, working style, communication
+└── PERSON <Name>.md      ← one per significant relationship
+```
+
+Two things are never written regardless of what you allow: secrets (passwords, keys, account numbers), and anything verbatim from someone else — the profile summarises what a thread shows about *you*, it doesn't copy what they wrote.
+
+Run it again in six months and it picks up where it left off; the hub keeps an `## Import Log` of what each run covered, so there's no state file and nothing to maintain.
+
+It is not part of the daily loop. Most people run it once.
+
+---
+
 ## Using it day to day
 
 The whole thing is three moments in a day. You never call a skill by name — you just talk, and the phrasing triggers the right one.
@@ -262,6 +304,8 @@ That third one is the quiet workhorse — it means the hub's backlinks pane list
 
 **Daily logs deliberately link to nothing.** A log names a project with a `## Project Name` heading and no wikilink at all. This is on purpose: nothing should link to a Tuesday. Logs are where events go, so they are written once and never need repairing when a note is renamed or moved. If your graph shows the logs sitting off to one side, unconnected, that's the design working — not a bug.
 
+**The profile is its own small cluster.** If you've run `vault-import`, `PROFILE Overview.md` and its `PERSON` notes link to each other in both directions, and `CLAUDE.md` carries a single line pointing at the hub. Neither file gets a `project` key — they don't belong to a project, and the pointer stays one line because `CLAUDE.md` is read at the start of every session.
+
 Every wikilink is written as a **filename only** — `[[PROJ Client Onboarding Overview]]`, never a path. Path-bearing links are the only kind that break when you move a folder, so the vault simply doesn't create any. The tradeoff is that note names have to be unique across the vault, which is why `new-project` checks for a collision before creating anything.
 
 ---
@@ -276,6 +320,8 @@ Every wikilink is written as a **filename only** — `[[PROJ Client Onboarding O
 | `02 Projects/*/PROJ * Overview.md` | The project hub: goal, why, tangible outcomes, open problems, `## Key Files`, `## Links Out`, and an optional `## Tasks` section. | Yes — this is the file to keep current. |
 | `03 Life/` | Same shape as `02 Projects/`, for things that aren't work. Optional. | Yes. |
 | `raw/` | Source material you didn't write. Never edited, never deleted; move a source to `raw/processed/` once you've written from it. Optional. | Add files, don't edit them. |
+| `04 Profile/PROFILE Overview.md` | Who you are, as derived from your own history and approved by you — interests, working style, communication, and the people table. Optional. | Yes — editing it directly beats re-running the import. |
+| `04 Profile/PERSON *.md` | One note per significant relationship: who they are to you, how you know them, and how often you're in contact. Optional. | Yes. |
 
 Tasks live inside each project's own hub file. There is no central task list, by design.
 
@@ -300,6 +346,18 @@ To remove it:
 ```
 
 Your `CLAUDE.md`, logs, and projects stay exactly where they are.
+
+---
+
+## Upgrading to v1.2
+
+Nothing to do. `vault-import` is new in v1.2 and it creates everything it needs on first run, including the one-line pointer it adds to `CLAUDE.md`. Update the plugin, restart, and say "learn about me" whenever you want it.
+
+The only cosmetic gap is that `## Skills Available` in an older `CLAUDE.md` won't list the new skill. Add the line yourself if you want it there:
+
+```markdown
+- **vault-import** — reads your mail, calendar and drive and builds a profile of you from what's already there, one approved finding at a time
+```
 
 ---
 
