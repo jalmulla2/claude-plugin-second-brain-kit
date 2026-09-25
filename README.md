@@ -1,6 +1,6 @@
-# second-brain-kit
+# Second Brain Kit — Claude Plugin
 
-A small Claude Code plugin that sets up a personal "vault" workspace: a `CLAUDE.md` and `MEMORY.md` that give every session context, plus skills for running your day.
+A small [Claude Code plugin](https://docs.claude.com/en/docs/claude-code/plugins) that sets up a personal "vault" workspace: a `CLAUDE.md` and `MEMORY.md` that give every session context, plus skills for running your day.
 
 Claude Code forgets everything between conversations. This plugin fixes that with plain markdown files in a folder you own — a context file Claude reads at the start of every session, a daily log it writes at the end of one, and a project folder structure both of those point at. No database, no sync service, no lock-in.
 
@@ -67,7 +67,7 @@ At the Claude Code prompt, run:
 Choose the option to add a marketplace, then paste:
 
 ```
-https://github.com/jalmulla2/second-brain-kit
+https://github.com/jalmulla2/claude-plugin-second-brain-kit
 ```
 
 That's the same URL as the address bar on this page — copy it from there if it's easier.
@@ -75,7 +75,7 @@ That's the same URL as the address bar on this page — copy it from there if it
 If you'd rather type one line than click through the menu, this does exactly the same thing:
 
 ```
-/plugin marketplace add jalmulla2/second-brain-kit
+/plugin marketplace add jalmulla2/claude-plugin-second-brain-kit
 ```
 
 Either way, Claude Code now knows where to find the plugin — it reads `.claude-plugin/marketplace.json` from this repo. Nothing is installed yet.
@@ -114,22 +114,22 @@ Run `/plugin` and confirm `second-brain-kit` shows as installed, or just say **"
 
 If you'd rather grab the files yourself — offline, behind a firewall, or you just prefer having the folder on disk — download the repo instead of adding it by name.
 
-On GitHub, hit **Code → Download ZIP**, then unzip it. GitHub appends the branch name, so you get `second-brain-kit-main`:
+On GitHub, hit **Code → Download ZIP**, then unzip it. GitHub appends the branch name, so you get `claude-plugin-second-brain-kit-main`:
 
 ```bash
-unzip ~/Downloads/second-brain-kit-main.zip -d ~/
+unzip ~/Downloads/claude-plugin-second-brain-kit-main.zip -d ~/
 ```
 
 Or clone it, if you'd rather be able to `git pull` later:
 
 ```bash
-git clone https://github.com/jalmulla2/second-brain-kit.git ~/second-brain-kit
+git clone https://github.com/jalmulla2/claude-plugin-second-brain-kit.git ~/claude-plugin-second-brain-kit-main
 ```
 
 Then start Claude Code in your vault and add the **folder** as the marketplace:
 
 ```
-/plugin marketplace add ~/second-brain-kit-main
+/plugin marketplace add ~/claude-plugin-second-brain-kit-main
 ```
 
 ```
@@ -140,7 +140,7 @@ Then start Claude Code in your vault and add the **folder** as the marketplace:
 
 Three things to know:
 
-- **The path must be the unzipped folder, not the `.zip`** — it needs to contain `.claude-plugin/marketplace.json`. If Finder unzipped it for you, that's `~/Downloads/second-brain-kit-main`.
+- **The path must be the unzipped folder, not the `.zip`** — it needs to contain `.claude-plugin/marketplace.json`. If Finder unzipped it for you, that's `~/Downloads/claude-plugin-second-brain-kit-main`.
 - **Don't delete or move the folder afterwards.** The marketplace points at that directory; it isn't a copy. Put it somewhere permanent *before* you add it.
 - **A ZIP install can't update itself.** `/plugin marketplace update` has nothing to pull from. To upgrade, download the ZIP again, replace the folder, and restart Claude Code. Clone instead if you want `git pull` to work.
 
@@ -149,7 +149,7 @@ Three things to know:
 The skills are just folders with a `SKILL.md` in them. Copying them into your personal skills directory works too:
 
 ```bash
-cp -r ~/second-brain-kit-main/skills/* ~/.claude/skills/
+cp -r ~/claude-plugin-second-brain-kit-main/skills/* ~/.claude/skills/
 ```
 
 Restart Claude Code and all four are available. You lose plugin-managed updates and `/plugin uninstall` — you'd add and remove these folders by hand.
