@@ -1,6 +1,7 @@
 ---
 name: vault-import
-description: Builds a profile of the user — who they are, what they work on, what they care about, and the people around them — by reading their own history in Gmail, Google Drive and Calendar, proposing every finding for review, and writing only what they approve. Trigger whenever the user says "learn about me", "import my history", "build my profile", "set up my profile", "get to know me", "read my email and build my profile", "what do you know about me", or asks to connect their accounts so the vault starts with context instead of an empty page.
+description: "Builds a reviewed profile of the user from Gmail, Calendar and Drive, writing only approved findings. Use for learn about me, import my history, build my profile, or get to know me."
+compatibility: "Claude Code, Cowork, claude.ai · needs Gmail, Google Calendar and/or Google Drive connectors and a vault made by vault-setup · Sonnet or Opus"
 ---
 
 # Vault Import
@@ -8,6 +9,25 @@ description: Builds a profile of the user — who they are, what they work on, w
 `vault-setup` creates an empty vault. This skill fills in the part of it that is about the user: who they are, what they keep returning to, how they work, and who they work with — derived from accounts they already have, not from an interview they have to sit through.
 
 It reads. It proposes. It writes nothing the user has not approved, one finding at a time.
+
+## When to use
+
+- The user says "learn about me", "import my history", "build my profile", "set up my profile", "get to know me", "read my email and build my profile" or "what do you know about me".
+- The user asks to connect their accounts so the vault starts with context instead of an empty page.
+- Again, months later, to pick up where the last run's `## Import Log` ended. Not part of the daily loop.
+
+## Checklist
+
+```
+- [ ] 0. CLAUDE.md exists; read the Import Log if a profile exists
+- [ ] 1. Interview: accounts, window, exclusions, depth (one per message)
+- [ ] 2. Scan one source; tally
+- [ ] 3. Propose numbered findings with evidence; wait for each decision
+- [ ] (repeat 2-3 per source)
+- [ ] 4. Write only approved findings
+- [ ] 5. Verify what was written (Step 5); fix and re-check if anything fails
+- [ ] 6. Record the import; confirm in four lines
+```
 
 ## Why this matters
 
@@ -85,7 +105,7 @@ Working style
 2. Writes early — 70% of your sent mail goes out before 08:00
 
 People
-3. Sara Al-Kuwari — closest working relationship. 340 threads since 2024, weekly 1:1 since March
+3. Layla Haddad — closest working relationship. 340 threads since 2024, weekly 1:1 since March
 ```
 
 **Every claim carries the evidence that produced it, in the same line.** A trait with no visible basis can't be argued with, and a profile the user can't argue with is one they can't correct.
@@ -156,7 +176,7 @@ tags: []
 Rules for this step:
 
 - **A person note needs a pattern, not a volume.** Someone the user has exchanged forty messages with over two years is a relationship. Someone they exchanged forty messages with in one week about one delivery is an event, and belongs in the hub's `## People` table at most. A folder full of notes on people the user doesn't think about is noise that makes the real ones harder to find.
-- **Check for a basename collision before writing any `PERSON` note.** Duplicate basenames make every `[[link]]` to them ambiguous. If `PERSON Ahmed.md` exists, stop and ask which Ahmed this is — don't disambiguate on the user's behalf.
+- **Check for a basename collision before writing any `PERSON` note.** Duplicate basenames make every `[[link]]` to them ambiguous. If `PERSON Omar.md` exists, stop and ask which Omar this is — don't disambiguate on the user's behalf.
 - **Neither file carries a `project` key.** They live outside project folders, and `CLAUDE.md` says to omit the key rather than leave it blank.
 - **Both directions of the link are written by hand here.** A row in the hub's `## People` table, and `[[PROFILE Overview]]` in the person note's `## Links Out`. The `project:` backlink mechanism is for project files and doesn't apply.
 - **On a re-run, add what's missing and leave the rest alone.** A line the user approved six months ago stays as they worded it. If something has since stopped being true, say so and let them decide — don't quietly overwrite it.
@@ -169,7 +189,18 @@ Profile: [[PROFILE Overview]] — who I am, what I work on, and who I work with.
 
 One line, a pointer and nothing else. `CLAUDE.md` is read at the start of every session, so the profile costs tokens forever if it lives there instead of behind a link.
 
-## Step 5 — Record the import and confirm
+## Step 5 — Verify what was written
+
+Re-read every file this run created or changed, and check:
+
+- Each line traces to a finding the user approved in Step 3, in their wording where they rewrote it. Nothing they rejected or didn't reach.
+- No secrets, nothing from a category they excluded in Step 1, and nothing quoted verbatim from someone else.
+- Every `PERSON` note has a row in the hub's `## People` table and `[[PROFILE Overview]]` under its `## Links Out`, and no basename collides with another note in the vault.
+- `CLAUDE.md` gained at most the one profile pointer line.
+
+If any check fails, return to Step 4, fix it, and check again.
+
+## Step 6 — Record the import and confirm
 
 Add a row to `## Import Log`:
 

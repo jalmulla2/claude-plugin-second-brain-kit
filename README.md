@@ -349,6 +349,16 @@ Your `CLAUDE.md`, logs, and projects stay exactly where they are.
 
 ---
 
+## Upgrading to v1.4
+
+Nothing to do. What changed:
+
+- **Optional task manager.** If your `CLAUDE.md` says tasks live in a task manager, `end-of-day` and `good-morning` use it for open items; otherwise they keep `### Still Open` in the log, as before. `vault-setup` asks about it (question 6).
+- **Generated `MEMORY.md`.** If your `MEMORY.md` says it is generated, the skills update the source and run its generator instead of editing it by hand.
+- **"Sent" handling.** Say "sent" (or "أرسلت") after sending something drafted in the session, and `end-of-day` logs it under `### Sent / Dispatched` and closes the matching task.
+- **Personal overrides.** Each skill reads an optional `personal.md` in its folder first, so you can keep your own conventions there and update the skills without losing them.
+- Every skill now has a short checklist and a verification step.
+
 ## Upgrading to v1.3
 
 Nothing to do. `end-of-day` now maintains `MEMORY.md` — before v1.3 the file was created at setup and then never written to again, so it sat at "Nothing here yet." while `good-morning` dutifully read it every morning. Update the plugin, restart, and the next `end-of-day` starts filling it.

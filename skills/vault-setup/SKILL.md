@@ -1,6 +1,7 @@
 ---
 name: vault-setup
-description: One-time first-run setup that creates a personal vault workspace — CLAUDE.md, MEMORY.md, the daily-log and project folders, and optionally a personal space and a raw source-material folder — and asks the user which language they want to work in. Trigger whenever the user installs this plugin for the first time and says things like "set up my vault", "get started", "initial setup", "set this up for me", or when good-morning / end-of-day / new-project can't find a CLAUDE.md and the user needs onboarding first.
+description: "First-run setup for a personal vault: interviews the user, then creates CLAUDE.md, MEMORY.md and the log and project folders. Use for set up my vault, get started, or when CLAUDE.md is missing."
+compatibility: "Claude Code, Cowork · needs write access to an empty or new vault folder · Sonnet or Opus"
 ---
 
 # Vault Setup
@@ -8,6 +9,23 @@ description: One-time first-run setup that creates a personal vault workspace �
 This skill runs once, the first time someone uses this plugin. It interviews the user, then scaffolds the files and folders that `good-morning`, `end-of-day`, and `new-project` all depend on.
 
 If `CLAUDE.md` already exists in the workspace root, tell the user setup already ran and ask if they want to redo it before touching anything — don't silently overwrite an existing vault.
+
+## When to use
+
+- The user has just installed the plugin and says "set up my vault", "get started", "initial setup" or "set this up for me".
+- `good-morning`, `end-of-day`, `new-project` or `vault-import` can't find a `CLAUDE.md` and the user agrees to onboard first.
+- Not to change an existing vault's conventions. Edit `CLAUDE.md` directly for that.
+
+## Checklist
+
+```
+- [ ] 1. Interview, one question per message
+- [ ] 2. CLAUDE.md
+- [ ] 3. MEMORY.md
+- [ ] 4. Folders (only those accepted), raw/README.md if raw/ was accepted
+- [ ] 5. Verify (Step 5); fix and re-check if anything fails
+- [ ] 6. Confirm in five lines
+```
 
 ## Step 1 — Interview
 
@@ -21,6 +39,7 @@ Keep each question to a line or two. No preamble between them.
 3. **What is this vault for?** — one loose line (e.g. "freelance work and personal projects"). Used as flavour text in `CLAUDE.md`. If they don't have an answer yet, move on.
 4. **A separate space for personal things?** — yes or no. If yes, I create `03 Life/`, and when you start a project I'll ask whether it's work or personal and file it accordingly. If no, everything lives in `02 Projects/`.
 5. **A `raw/` folder for source material?** — yes or no. `raw/` holds material you did **not** write: PDFs, transcripts, exports, articles, someone else's notes. Nothing in it is ever edited or deleted; once you've written a note from a source, the source moves to `raw/processed/`. It is not an inbox.
+6. **A task manager?** — do you already keep your to-dos in a task app I can reach here (for example Todoist, connected to Claude)? If yes, which one. If no, open items will live in your daily logs and project files. Check which connectors are actually available before asking; if none is, skip this question and treat the answer as no.
 
 Create nothing until every question is answered.
 
@@ -67,10 +86,19 @@ Daily logs are the exception to both. A log carries no `project` key and no wiki
 
 ## Skills Available
 - **good-morning** — start-of-day orientation: open items first, then what got finished, then one recommendation
-- **end-of-day** — writes the session handoff log and reconciles the project hubs
+- **end-of-day** — closes what got finished, captures what is still open, writes the session handoff log and reconciles the project hubs
 - **new-project** — interviews you and creates a project folder, its hub file, and a row above
 - **vault-import** — reads your mail, calendar and drive and builds a profile of you from what's already there, one approved finding at a time
 ````
+
+If they answered yes to question 6, add this section after `## Project Files`:
+
+````markdown
+## Tasks
+Tasks live in <task manager>, not in the vault. Open items go there in the same turn they come up, and finished ones are closed there. Daily logs carry no `### Still Open` section, and a project hub's `## Tasks` section holds only a pointer to the task manager.
+````
+
+`good-morning` and `end-of-day` read this section to decide where open items live. Without it, they keep open items in the logs and hubs.
 
 Write the prose in the user's chosen language; keep every heading, key and path above in English.
 
@@ -123,7 +151,18 @@ Write that README's prose in the user's chosen language; keep the folder names a
 
 No `.gitkeep` needed — the folders can sit empty until the other skills write into them.
 
-## Step 5 — Confirm
+## Step 5 — Verify
+
+List the workspace root and re-read `CLAUDE.md`, then check:
+
+- `CLAUDE.md` has `## About`, `## Language` (with the language they chose), `## File Conventions`, `## Project Files`, `## Active Projects` and `## Skills Available`, plus `## Tasks` only if they said yes to question 6. No folder map.
+- Every heading, key and path is in English; the prose is in their language.
+- `MEMORY.md` exists with the `Nothing here yet.` placeholder.
+- The folders that exist are exactly `01 Daily Logs/`, `02 Projects/` and the optional ones they accepted. `raw/README.md` exists if and only if `raw/` does.
+
+If any check fails, return to the step that produced it, fix it, and check again.
+
+## Step 6 — Confirm
 
 Tell the user, briefly:
 - `CLAUDE.md` and `MEMORY.md` are set up, and which folders were created

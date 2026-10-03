@@ -1,52 +1,65 @@
 ---
 name: new-project
-description: Creates a new project in the workspace with a pre-filled project hub file that links the project's files together. Trigger this skill whenever the user says "new project", "start a project", "create a project", "I want to work on something new", "add a project", or anything that signals they want to kick off a new project. Always interview the user before creating any files.
+description: "Interviews the user, then creates a project folder and PROJ overview hub and registers it so later sessions know it exists. Use when the user says new project or wants to start something new."
+compatibility: "Claude Code, Cowork, claude.ai · needs read/write access to the vault folder · Sonnet or Opus"
 ---
 
 # New Project
 
-This skill interviews the user about a new project, creates its folder and hub file, and registers the project in `CLAUDE.md` so Claude knows about it in future sessions.
+If `personal.md` exists in this folder, read it first; it overrides the defaults above.
+
+Interviews the user about a new project, creates its folder and hub file, and registers it so `good-morning` and future sessions know it exists. Nothing is written until the interview is done.
+
+## When to use
+
+- The user says "new project", "start a project", "create a project", "add a project" or "I want to work on something new".
+- `good-morning` hands over because the user wants to start something new.
+- Not for an ongoing responsibility with no end state. That is an area, not a project (Step 0).
 
 ## Language
 
-Follow the `## Language` block in `CLAUDE.md`. Do not restate or reinterpret the rule here.
+Follow the language rule in `CLAUDE.md` (its `## Language` block, if it has one). Write the prose (goal, why, outcomes, problems) in the conversation's current language. Frontmatter keys, section headings, the folder name and the `PROJ <Name> Overview.md` filename pattern stay English regardless.
 
-## Step 1 — Interview the user
+## Checklist
 
-**Ask one question per message.** Send the question, stop, and wait for the answer before sending the next one. Do not batch the questions and do not list them all up front. If the user answers several at once, confirm what you captured and resume from the first one they haven't answered.
+```
+- [ ] 0. Is it a project? Does it already exist?
+- [ ] 1. Interview, one question at a time
+- [ ] 2. Create the folder and the hub
+- [ ] 3. Register the project
+- [ ] 4. Verify (Step 4); fix and re-check if anything fails
+- [ ] 5. Confirm and offer to start
+```
 
-Before you start, check whether `03 Life/` exists at the workspace root. If it does, question 6 applies; if it doesn't, skip it.
+## Step 0 — Is it a project, and is it new?
 
-1. **Name** — what's the project called?
-2. **Goal** — what is this trying to accomplish? One sentence is fine.
-3. **Why** — why does this matter to you? The real reason.
-4. **Done** — what does "done" look like? What will exist when this has succeeded?
-5. **Open problems** — do you already know the main problems you'll have to solve? Fine if not.
-6. **Work or personal?** — asked only if `03 Life/` exists. Work goes in `02 Projects/`, personal in `03 Life/Projects/`.
+**Projects end; areas don't.** A project is time-bounded and has an end state, something that will be *finished*. If there is no answer to "what does done look like?", it is an ongoing area of responsibility. Say so instead of creating a folder that can never close. Ask this of yourself after the "done" question, not out loud.
 
-**Is it actually a project?** Ask this of yourself after question 4, not out loud. A project is time-bounded and has an end state — something that will be *finished*. If there is no answer to "what does done look like", it is an ongoing area of responsibility, not a project. Say so instead of creating a folder that can never close.
+**Already started?** The user may have started it in another conversation. Search the vault for the keyword before creating anything (`find . -iname '*<keyword>*'` from the vault root, or the area's index note if the vault has one).
 
-**Name collision.** Before creating anything, check that no `PROJ <Project Name> Overview.md` already exists anywhere in the vault. Two notes with the same basename make every `[[...]]` to them ambiguous. If it collides, tell the user and ask for a different name.
+**Name collision.** No `PROJ <Project Name> Overview.md` may already exist anywhere in the vault. Two notes with the same basename make every `[[link]]` to them ambiguous. If it collides, tell the user and ask for a different name.
 
-## Step 2 — Create the project folder and hub
+## Step 1 — Interview
+
+**One question per message.** Send it, stop, wait for the answer. Don't batch the questions or list them up front. If the user answers several at once, confirm what you captured and resume from the first unanswered one.
+
+1. **Name** — what's it called?
+2. **Goal** — what is it trying to accomplish? One sentence is fine.
+3. **Why** — why does it matter? The real reason.
+4. **Done** — what will exist when it has succeeded?
+5. **Open problems** — anything they already know they'll have to solve? Fine if not.
+6. **Where it belongs** — only if the vault has more than one project root. With a `03 Life/` folder: work or personal? With area folders: which area? Infer it from the answers and confirm rather than asking cold.
+
+## Step 2 — Create the folder and the hub
 
 Where it goes:
 
-- work, or `03 Life/` doesn't exist → `02 Projects/<Project Name>/`
+- work, or the vault has no `03 Life/` → `02 Projects/<Project Name>/`
 - personal → `03 Life/Projects/<Project Name>/` (create `03 Life/Projects/` if it isn't there yet)
 
-The folder starts with one file:
+The folder starts with one file, the project's **hub**: `PROJ <Project Name> Overview.md`. It is what Claude reads first whenever the project comes up, and it ties the project's files together. Never start the filename with `[`; Obsidian can't link to it.
 
-```
-<root>/<Project Name>/
-└── PROJ <Project Name> Overview.md
-```
-
-This is the project's **hub**. It is what Claude reads first whenever the project comes up, and it is what ties the project's files together. The `PROJ` prefix makes it identifiable; never rename it to start with `[`.
-
-Write the prose — goal, why, outcomes, problems — in the conversation's current language. Keep the frontmatter keys, section headings, folder name and the `PROJ ... Overview.md` filename pattern in English regardless.
-
-Use this exact template:
+Template:
 
 ```markdown
 ---
@@ -84,57 +97,37 @@ _No files yet — a row is added here every time a file is created in this proje
 _Nothing yet._
 ```
 
-Two things about that template:
+- **`description`** is what an agent (and any index) reads to judge relevance without opening the note. Make it say what the project is, not the title restated.
+- **No `project` key on the hub.** Every *other* file in the folder points at it with `project: "[[PROJ <Project Name> Overview]]"`; that is how the hub collects them as backlinks. A file can't belong to itself.
+- **`## Key Files` starts empty and doesn't stay empty.** Whenever a file is created in the project folder, by any skill or by ordinary work, set its `project` key and add a row in the same action: `| [[Filename Without Extension]] | <one phrase: why this file exists> |`. Delete the placeholder line with the first row. `end-of-day` adds any row that was missed, as a safety net.
+- **`## Links Out`** is a labelled list of deliberate relationships to notes outside the folder (`- Depends on: [[PROJ Other Project Overview]]`, `- Background: [[Some Note]]`, external URLs). Filename-only wikilinks. Add one only when a real relationship exists.
 
-- **No `project` key.** Every *other* file in the folder points at this hub with `project: "[[PROJ <Project Name> Overview]]"`, which is how the hub collects them as backlinks. The hub does not point at itself.
-- **`## Key Files` is created empty on purpose, and does not stay empty.** It fills as the project is worked on. The italic placeholder line is deleted when the first row lands.
+## Step 3 — Register the project
 
-### Keeping `## Key Files` current
+This step is what makes future sessions aware of the project. Follow whichever applies:
 
-Empty at birth is correct. Empty at week three means the mechanism failed. Two triggers keep it honest:
+- **`CLAUDE.md` has an `## Active Projects` table:** add a row, `| <Project Name> | [[PROJ <Project Name> Overview]] |`. The link is filename-only, so the row survives the project moving between roots. Don't change the table's structure, and don't add a folder map anywhere in `CLAUDE.md`; a stale map is worse than none.
+- **`MEMORY.md` says it is generated from `## State` blocks:** add a State block to the hub directly after the frontmatter, then run the generator its header names. Don't edit `MEMORY.md` or `CLAUDE.md` by hand.
 
-1. **At creation time — the real one.** The rule in `## Project Files` of `CLAUDE.md` applies to *any* file created in a project folder, by any skill or by ordinary work with no skill involved: set the `project` frontmatter and add the row in the same action that creates the file. Row format:
+  ```markdown
+  ## State
+  - **Status:** active
+  - **Where it stands:** <one sentence: what this is for, where it is>
+  - **Blocked on:** nothing
+  - **Next:** <the single next concrete action>
+  ```
 
-   `| [[Filename Without Extension]] | <short phrase: what this file is for> |`
+  State, never events: four lines, no past-tense history.
+- **The vault keeps generated index notes:** regenerate the owning one with the tool that builds it. Never hand-edit an index.
 
-   The Purpose column is one phrase, not a sentence, and says why the file exists rather than restating its name.
+## Step 4 — Verify before confirming
 
-2. **At end of session — the safety net.** `end-of-day` walks the files it is about to list under "What Was Built or Changed" and adds any row or `project` key that was missed. It never rewrites rows that already exist.
+- The hub exists at the path from Step 2, and its basename is unique in the vault.
+- Its frontmatter parses (the `---` fences are intact) and it has no `project` key.
+- The project is registered by every route in Step 3 that applies: the table row, or the State block plus a rebuilt `MEMORY.md` with the project's line in it.
 
-### `## Links Out`
+If any check fails, return to the step that produced it, fix it, and check again.
 
-A labelled list of deliberate relationships to notes *outside* this project folder — a related project's hub, a reference note, a standing document. Label every entry with what the relationship is; a bare link nobody can interpret isn't worth the line.
+## Step 5 — Confirm and offer to dive in
 
-```markdown
-## Links Out
-- Depends on: [[PROJ Other Project Overview]]
-- Background: [[Some Reference Note]]
-- Vendor documentation — https://example.com/docs
-```
-
-Wikilinks here are filename-only, like everywhere else. External URLs are fine — they aren't wikilinks. Add an entry when a real relationship exists; never invent one to fill the section.
-
-## Step 3 — Update CLAUDE.md
-
-This step is critical — if you don't do it, `good-morning` and future sessions won't know this project exists.
-
-Open `CLAUDE.md` in the workspace root. Find the `## Active Projects` section. It uses a pipe table format:
-
-```markdown
-| Project | Key File |
-|---------|----------|
-| <Project Name> | [[PROJ <Project Name> Overview]] |
-```
-
-Add the new project as a new row. The row is identical whether the project sits in `02 Projects/` or `03 Life/Projects/` — the link is filename-only, so the table survives a project being moved between roots. That is the point.
-
-Do not change the table structure or add new columns, and don't add a folder listing elsewhere in `CLAUDE.md` — a stale map is worse than no map, and Claude can read the file system directly when it needs to.
-
-## Step 4 — Confirm and offer to dive in
-
-Tell the user:
-- The project folder and hub file are created, and where
-- `CLAUDE.md` has been updated so Claude will remember this project
-- Ask: "Want to dive into one of the open problems right now, or save it for later?"
-
-Keep it short — they're ready to work.
+Tell the user, briefly: the folder and hub are created and where, and the project is registered so later sessions will know it. Then ask: "Want to dive into one of the open problems now, or save it for later?"
